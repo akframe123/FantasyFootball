@@ -14,12 +14,12 @@ class League:
         self.tes = self.add_tes(link_te)
         self.ks = self.add_ks(link_k)
         self.dsts = self.add_dsts(link_dst)
-        self.pprint(self.qbs)
-        self.pprint(self.rbs)
-        self.pprint(self.wrs)
-        self.pprint(self.tes)
-        self.pprint(self.ks)
-        self.pprint(self.dsts)
+        # self.pprint(self.qbs)
+        # self.pprint(self.rbs)
+        # self.pprint(self.wrs)
+        # self.pprint(self.tes)
+        # self.pprint(self.ks)
+        # self.pprint(self.dsts)
 
     def pprint(self,df):
         print(tabulate(df,headers='keys', tablefmt='psql'))
