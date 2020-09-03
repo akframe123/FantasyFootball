@@ -20,7 +20,7 @@ class League:
         # self.pprint(self.tes)
         # self.pprint(self.ks)
         # self.pprint(self.dsts)
-        self.set_league_points_rules()
+        # self.set_league_points_rules()
     
     def pprint(self,df):
         print(tabulate(df,headers='keys', tablefmt='psql'))
@@ -41,7 +41,7 @@ class League:
         rules_dict_te = {'yds (Receiving Yards)':0.1, 'fl (Fumbles Lost)':-2, \
         'td (Receiving Touchdowns)':6,'ReFD (Receiving First Down)':1}
         self.adjust_points_te (rules_dict_te, self.tes)
-        
+
         # self.pprint(self.wrs)
         # self.pprint(self.rbs)
         self.pprint(self.tes)
