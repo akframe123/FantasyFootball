@@ -12,18 +12,40 @@ class League:
         self.rbs = self.add_rbs(link_rb)
         self.wrs = self.add_wrs(link_wr)
         self.tes = self.add_tes(link_te)
-        self.ks = self.add_ks(link_k)
-        self.dsts = self.add_dsts(link_dst)
+        # self.ks = self.add_ks(link_k)
+        # self.dsts = self.add_dsts(link_dst)
         # self.pprint(self.qbs)
         # self.pprint(self.rbs)
         # self.pprint(self.wrs)
         # self.pprint(self.tes)
         # self.pprint(self.ks)
         # self.pprint(self.dsts)
-
+        self.set_league_points_rules()
+    
     def pprint(self,df):
         print(tabulate(df,headers='keys', tablefmt='psql'))
-    
+
+    def set_league_points_rules(self):
+        rules_dict_qb = {'td (Touchdowns Passes)':4,\
+            'yds (Passing Yards)':0.04,'int (Interceptions Thrown)':-2,\
+                'yds (Rushing Yards)':.1, 'fl (Fumbles Lost)':-2}
+        self.adjust_points_qb(rules_dict_qb, self.qbs)
+
+        rules_dict_wr_rb = {'td (Rushing Touchdowns)':6, 'yds (Rushing Yards)':0.1\
+            , 'yds (Receiving Yards)':0.1, 'fl (Fumbles Lost)':-2, \
+                'td (Receiving Touchdowns)':6,'ReFD (Receiving First Down)':1,\
+                    'RuFD (Rushing First Down)':1}
+        self.adjust_points_wr_rb(rules_dict_wr_rb, self.wrs)
+        self.adjust_points_wr_rb(rules_dict_wr_rb, self.rbs)
+       
+        rules_dict_te = {'yds (Receiving Yards)':0.1, 'fl (Fumbles Lost)':-2, \
+        'td (Receiving Touchdowns)':6,'ReFD (Receiving First Down)':1}
+        self.adjust_points_te (rules_dict_te, self.tes)
+        
+        # self.pprint(self.wrs)
+        # self.pprint(self.rbs)
+        self.pprint(self.tes)
+
     def parse_link(self, link, defense=False):
         page = requests.get(link)
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -127,6 +149,48 @@ class League:
                                         
         # print(tabulate(df_players_dst,headers='keys', tablefmt='psql'))
         return df_players_dst
+
+    def adjust_points_qb(self, d, df):
+        # print(d)
+        # self.pprint(df)
+        for index,row in df.iterrows():
+            tot_points = 0
+            for i in d:
+                tot_points += row[i]*d[i]
+            df.at[index,'adjusted fantasy points'] = tot_points
+        # self.pprint(self.qbs)
+    
+    def adjust_points_wr_rb(self, d, df):
+        '''
+        ReFD (Receiving First Down)
+        RuFD (Rushing First Down)
+        '''
+        for index,row in df.iterrows():
+            tot_points = 0
+            for i in d:
+                try:
+                    tot_points += row[i]*d[i]
+                except KeyError:
+                    temp1 = row['yds (Receiving Yards)']/20 * d[i]
+                    tot_points += temp1
+                    df.at[index,"ReFD (Receiving First Down)"] = temp1
+                    temp2 = row['yds (Rushing Yards)']/20 * d[i]
+                    tot_points += temp2
+                    df.at[index,"RuFD (Rushing First Down)"] = temp2
+            df.at[index,'adjusted fantasy points'] = tot_points
+        # self.pprint(df)
+    
+    def adjust_points_te(self, d, df):
+        for index,row in df.iterrows():
+            tot_points = 0
+            for i in d:
+                try:
+                    tot_points += row[i]*d[i]
+                except KeyError:
+                    temp = row['yds (Receiving Yards)']/20 * d[i]
+                    tot_points += temp
+                    df.at[index,"ReFD (Receiving First Down)"] = temp
+            df.at[index,'adjusted fantasy points'] = tot_points
 
 league = League("Radical Ultimate FFF Experience",\
 'https://www.cbssports.com/fantasy/football/stats/QB/2019/season/projections/ppr/',\
